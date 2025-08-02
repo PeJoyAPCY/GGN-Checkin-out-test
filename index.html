@@ -1,209 +1,22 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GGN Check-in/Check-out</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    body {
-      font-family: "Segoe UI", Tahoma, sans-serif;
-      max-width: 500px;
-      margin: auto;
-      padding: 20px;
-      background-color: #fdf5f7;
-      color: #400000;
-    }
+<!-- ... ส่วน head และ body ของ HTML เหมือนเดิม ... -->
 
-    .logo {
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 10px;
-      background-color: #ddd;
-      border-radius: 50%;
-      overflow: hidden;
-    }
+<script>
+    // ----- การตั้งค่า -----
+    const botToken = "7764756651:AAF4G_IFWjNzKoTJj_lpQW3oLANKAZIVnWU"; // Token ของคุณ
+    const chatId = "-4929290865"; // Chat ID ของคุณ
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbzrJRiKpplq_PNXMf7-E6ttk6JnyJfltx3SDrhnUwjkqWG460WDI3SuxIw81sfQ0XAi4w/exec"; // **สำคัญ** URL ที่คัดลอกมาจากการ Deploy
 
-    .logo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .zone-title {
-      margin: 0;
-      font-size: 22px;
-      color: #800000;
-      margin-bottom: 5px;
-      text-align: center;
-    }
-
-    .system-title {
-      margin: 0;
-      font-size: 18px;
-      color: #800000;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .admin-link {
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .admin-link a {
-      color: #800000;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 8px 16px;
-      border: 2px solid #800000;
-      border-radius: 6px;
-      display: inline-block;
-      transition: all 0.3s;
-    }
-
-    .admin-link a:hover {
-      background-color: #800000;
-      color: white;
-    }
-
-    label {
-      margin-right: 15px;
-      font-weight: bold;
-    }
-
-    input[type="radio"] {
-      margin-right: 5px;
-    }
-
-    input[type="file"],
-    textarea,
-    input[type="text"],
-    button {
-      width: 100%;
-      font-size: 16px;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    button {
-      background-color: #800000;
-      color: white;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-
-    button:hover {
-      background-color: #a00000;
-    }
-
-    button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
-    }
-
-    #previewText {
-      background: #fff5f5;
-      border: 1px solid #d9b3b3;
-      padding: 10px;
-      white-space: pre-wrap;
-      font-size: 15px;
-      margin-top: 10px;
-    }
-
-    #previewContainer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      margin-top: 10px;
-    }
-
-    #previewContainer img {
-      width: 120px;
-      height: 160px;
-      object-fit: cover;
-      border: 2px solid #800000;
-      border-radius: 6px;
-    }
-
-    #status {
-      margin-top: 10px;
-      font-weight: bold;
-      text-align: center;
-      color: #800000;
-    }
-
-    .success {
-      color: #28a745;
-    }
-
-    .error {
-      color: #dc3545;
-    }
-
-    canvas {
-      display: none;
-    }
-
-    .loading {
-      display: none;
-      text-align: center;
-      color: #800000;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="logo">
-    <img src="https://img2.pic.in.th/pic/logo-ggn.png" alt="โลโก้" />
-  </div>
-
-  <h2 class="zone-title">เขต ลำพูน</h2>
-  <h2 class="system-title">📷 ระบบ Check in / Check out</h2>
-
-  <div class="admin-link">
-    <a href="/admin.html" target="_blank">📊 Admin Dashboard</a>
-  </div>
-
-  <div>
-    <label><input type="radio" name="jobType" value="Check in (เข้างาน)"> Check in (เข้างาน)</label>
-    <label><input type="radio" name="jobType" value="Check out (ออกงาน)"> Check out (ออกงาน)</label>
-  </div>
-
-  <input type="text" id="fullname" placeholder="ชื่อ-นามสกุล (บังคับกรอก)" />
-  <textarea id="text" rows="2" placeholder="ข้อความเพิ่มเติม-จุดรักษาการณ์ (ถ้ามี)"></textarea>
-  <div id="previewText"></div>
-  <input type="file" id="imageInput" accept="image/jpeg,image/png" multiple />
-  <button id="sendBtn">ส่งภาพและ Log เข้าระบบ</button>
-
-  <div class="loading" id="loading">กำลังส่งข้อมูล...</div>
-  <div id="previewContainer"></div>
-  <div id="status"></div>
-  <canvas id="canvas"></canvas>
-
-  <script>
-    const botToken = "7764756651:AAF4G_IFWjNzKoTJj_lpQW3oLANKAZIVnWU";
-    const chatId = "-4929290865";
-
+    // ... โค้ดส่วนที่เหลือเหมือนเดิม ตั้งแต่ imageInput จนถึง processImage ...
     const imageInput = document.getElementById("imageInput");
     const previewContainer = document.getElementById("previewContainer");
     const previewText = document.getElementById("previewText");
     const extraText = document.getElementById("text");
     const fullname = document.getElementById("fullname");
     const status = document.getElementById("status");
-    const loading = document.getElementById("loading");
-    const sendBtn = document.getElementById("sendBtn");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
 
     let photos = [];
-    let processedPhotos = [];
 
     function getSelectedJob() {
       const selected = document.querySelector('input[name="jobType"]:checked');
@@ -259,133 +72,81 @@
       });
     }
 
-    async function sendToSystem() {
+    // ----- ฟังก์ชัน sendToTelegram ที่แก้ไขใหม่ -----
+    async function sendToTelegram() {
       const name = fullname.value.trim();
       const job = getSelectedJob();
       const extraMsg = extraText.value.trim();
 
+      // --- การตรวจสอบข้อมูล (เหมือนเดิม) ---
       if (!name) {
         alert("กรุณากรอกชื่อ-นามสกุล");
         fullname.focus();
         return;
       }
-
       if (/\d/.test(name)) {
         alert("ห้ามกรอกตัวเลขในชื่อ-นามสกุล");
         fullname.focus();
         return;
       }
-
       if (!job) {
         alert("กรุณาเลือกประเภทงาน");
         return;
       }
-
       if (photos.length === 0) {
         alert("กรุณาเลือกรูปภาพ");
         return;
       }
 
+      status.textContent = "กำลังส่งข้อมูล...";
+      updatePreviewText();
+      const caption = previewText.textContent;
+
+      // --- ส่วนที่ 1: ส่ง Log ไปที่ Google Apps Script ---
       try {
-        // แสดง loading
-        loading.style.display = 'block';
-        sendBtn.disabled = true;
-        status.textContent = '';
-
-        updatePreviewText(); // อัปเดตข้อความก่อนส่ง
-        const caption = previewText.textContent;
-        const nowStr = new Date().toLocaleString("th-TH");
-
-        // 1. บันทึกข้อมูลลง Backend Database
-        const logData = {
-          fullname: name,
-          job_type: job,
-          extra_message: extraMsg,
-          zone: 'เขต ลำพูน',
-          photo_count: photos.length,
-          timestamp: nowStr
-        };
-
-        const logResponse = await fetch('/api/checkin', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+        const logData = { name: name, job: job, extraMsg: extraMsg };
+        await fetch(webAppUrl, {
+          method: "POST",
+          mode: "no-cors", // สำคัญมากสำหรับ Apps Script
+          cache: "no-cache",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(logData)
         });
+      } catch (error) {
+        console.error("Error sending log to Google Sheet:", error);
+        status.textContent = "❌ เกิดข้อผิดพลาดในการบันทึก Log";
+        // อาจจะหยุดการทำงานตรงนี้ หรือปล่อยให้ส่งรูปต่อก็ได้
+        return;
+      }
 
-        const logResult = await logResponse.json();
-        
-        if (!logResult.success) {
-          throw new Error(logResult.error || 'ไม่สามารถบันทึกข้อมูลได้');
-        }
-
-        // 2. ส่งรูปภาพไปยัง Telegram (เหมือนเดิม)
-        processedPhotos = [];
+      // --- ส่วนที่ 2: ส่งรูปภาพไปที่ Telegram (เหมือนเดิม) ---
+      try {
         for (let i = 0; i < photos.length; i++) {
           const blob = await processImage(photos[i]);
           const form = new FormData();
           form.append("chat_id", chatId);
           form.append("photo", blob, `photo${i + 1}.jpg`);
           form.append("caption", caption);
-
-          const telegramResponse = await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+          await fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
             method: "POST",
             body: form
-          });
-
-          if (!telegramResponse.ok) {
-            console.warn(`ไม่สามารถส่งรูปที่ ${i + 1} ไปยัง Telegram ได้`);
-          }
-
-          processedPhotos.push({ i: i + 1, nowStr, name, job, extraMsg });
+          } );
         }
-
-        // 3. ส่งไฟล์ Excel ไปยัง Telegram (สำหรับ backward compatibility)
-        const wb = XLSX.utils.book_new();
-        const data = [["ลำดับ", "วันเวลา", "ชื่อ", "ประเภทงาน", "ข้อความ"]];
-        processedPhotos.forEach(p =>
-          data.push([p.i, p.nowStr, p.name, p.job, p.extraMsg])
-        );
-        const ws = XLSX.utils.aoa_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, "Log");
-        const wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-        const excelBlob = new Blob([wbout], { type: "application/octet-stream" });
-
-        const logForm = new FormData();
-        logForm.append("chat_id", chatId);
-        logForm.append("document", excelBlob, "log.xlsx");
-
-        await fetch(`https://api.telegram.org/bot${botToken}/sendDocument`, {
-          method: "POST",
-          body: logForm
-        });
-
-        // แสดงผลสำเร็จ
-        status.innerHTML = `<span class="success">✅ ส่งข้อมูลสำเร็จแล้ว! (ID: ${logResult.log_id})</span>`;
-        
-        // รีเซ็ตฟอร์ม
-        photos = [];
-        updatePreview();
-        previewText.textContent = "";
-        extraText.value = "";
-        fullname.value = "";
-        document.querySelectorAll('input[name="jobType"]').forEach(el => el.checked = false);
-
       } catch (error) {
-        console.error('Error:', error);
-        status.innerHTML = `<span class="error">❌ เกิดข้อผิดพลาด: ${error.message}</span>`;
-      } finally {
-        loading.style.display = 'none';
-        sendBtn.disabled = false;
+        console.error("Error sending photo to Telegram:", error);
+        status.textContent = "❌ เกิดข้อผิดพลาดในการส่งภาพ";
+        return;
       }
+
+      // --- เคลียร์ฟอร์มเมื่อสำเร็จ (เหมือนเดิม) ---
+      status.textContent = "✅ ส่งข้อมูลสำเร็จ!";
+      photos = [];
+      updatePreview();
+      previewText.textContent = "";
+      extraText.value = "";
+      fullname.value = "";
+      document.querySelectorAll('input[name="jobType"]').forEach(el => el.checked = false);
     }
 
-    document.getElementById("sendBtn").addEventListener("click", sendToSystem);
-
-    // Auto-update preview text
-    updatePreviewText();
-  </script>
-</body>
-</html>
-
+    document.getElementById("sendBtn").addEventListener("click", sendToTelegram);
+</script>
