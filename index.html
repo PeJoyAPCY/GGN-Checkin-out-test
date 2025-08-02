@@ -1,3 +1,147 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GGN Check-in/Check-out</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      max-width: 500px;
+      margin: auto;
+      padding: 20px;
+      background-color: #fdf5f7;
+      color: #400000;
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 10px;
+      background-color: #ddd;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .zone-title {
+      margin: 0;
+      font-size: 22px;
+      color: #800000;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    .system-title {
+      margin: 0;
+      font-size: 18px;
+      color: #800000;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    label {
+      margin-right: 15px;
+      font-weight: bold;
+    }
+
+    input[type="radio"] {
+      margin-right: 5px;
+    }
+
+    input[type="file"],
+    textarea,
+    input[type="text"],
+    button {
+      width: 100%;
+      font-size: 16px;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #800000;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #a00000;
+    }
+
+    #previewText {
+      background: #fff5f5;
+      border: 1px solid #d9b3b3;
+      padding: 10px;
+      white-space: pre-wrap;
+      font-size: 15px;
+      margin-top: 10px;
+    }
+
+    #previewContainer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    #previewContainer img {
+      width: 120px;
+      height: 160px;
+      object-fit: cover;
+      border: 2px solid #800000;
+      border-radius: 6px;
+    }
+
+    #status {
+      margin-top: 10px;
+      font-weight: bold;
+      text-align: center;
+      color: #800000;
+    }
+
+    canvas {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="logo">
+    <img src="https://img2.pic.in.th/pic/logo-ggn.png" alt="โลโก้" />
+  </div>
+
+  <h2 class="zone-title">เขต 1</h2>
+  <h2 class="system-title">📷 ระบบ Check in / Check out</h2>
+
+  <div>
+    <label><input type="radio" name="jobType" value="Check in (เข้างาน)"> Check in (เข้างาน)</label>
+    <label><input type="radio" name="jobType" value="Check out (ออกงาน)"> Check out (ออกงาน)</label>
+  </div>
+
+  <input type="text" id="fullname" placeholder="ชื่อ-นามสกุล (บังคับกรอก)" />
+  <textarea id="text" rows="2" placeholder="ข้อความเพิ่มเติม-จุดรักษาการณ์ (ถ้ามี)"></textarea>
+  <div id="previewText"></div>
+  <input type="file" id="imageInput" accept="image/jpeg,image/png" multiple />
+  <button id="sendBtn">ส่งภาพและ Log เข้า Telegram</button>
+
+  <div id="previewContainer"></div>
+  <div id="status"></div>
+  <canvas id="canvas"></canvas>
+
 <!-- ... ส่วน head และ body ของ HTML เหมือนเดิม ... -->
 
 <script>
